@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <script>
+        /*
+            1.数据库概括
+                --简称：DB
+                --按照一定格式存储数据的一些文件的组合
+
+            2.数据库管理系统
+                --简称DBMS
+                --数据库管理系统是专门用来管理数据库中的数据，数据库管理系统可以对数据库中的数据进行增删改查
+                --常见的数据库管理系统：MySQL,Oracle,MS SqlServer,DB2,sybase等
+
+            3.SQL语句
+                --程序化查询语句
+                --可通过编写SQL语句，然后DBMS执行SQL语句，实现增删改查
+
+            4.windows下的以命令行执行MySQL的启动和停止
+                --通过管理员身份启动cmd
+                    --启动：net start 服务器名称（MySQL）
+                    --停止：net top 服务器名称（MySQL）
+                --查看服务：  此电脑>管理（属性）>管理和应用程序（服务）
+
+            5.本地登录MySQL
+                --以管理员身份运行cmd （前提是MySQL服务已启动）
+                    --执行 $mysql -uroot -p123456    (输入数据库的用户名和密码)
+                    --登录进入后界面：
+                        mysql>...
+                    --退出：
+                        mysql>exit
+                --隐藏密码格式：
+                    --$mysql -uroot -p
+
+            6.MySQL的常用命令：
+                命令不区分大小写
+                --退出：exit
+                --查看MySQL有哪些数据库：show databases;(以分号结尾)
+                --选择使用某个数据库：use test;(选择使用test的数据库，以分号结尾)
+                --创建数据库：create database test1;(数据库名称，以分号结尾)
+                --查看数据库中存在的表：show tables; (前提是已经使用了某个数据库，即执行use test类似的命令)
+
+            7.数据库中的表：
+                --定义：数据库中的最基本的单元
+                --数据库中是以表格的形式表示数据库，因为表比较直观
+                --组成：
+                    行（row）:称为数据/记录
+                    列（column）:称为字段
+                        --字段属性：字段名，数据类型，约束等属性
+                            --约束：约束有很多，其中一个叫做唯一性约束，这种约束添加之后，该字段的数据不能重复
+
+            8.SQL语句的分类：
+                --DQL:
+                    数据库查询语言（带有select的查询语句）
+                --DML：
+                    数据库操作语言（操作数据库中的表中的数据）
+                    --insert 增
+                    --delete 删
+                    --update 改
+                --DDL：
+                    数据定义语言
+                    凡是带有create ,drop,alert的都是DDL
+                    DDL主要是操作表的结构，不是表中的数据
+                    create:新建，类似于增
+                    drop:删除
+                    alert:修改
+                --TCL:
+                    事务控制语言
+                    包括：
+                        事务提交：commit;
+                        事务回滚：rollback;
+                --DCL:
+                    数据控制语言
+                    例如：授权grant,撤销权限revoke
+
+            9.导入sql文件到数据库中
+                命令：$source D://...(导入文件的路径，路径中不能存在中文);
+
+            10.查看表中的数据
+                执行SQL中的DQL,查询语句
+                命令：$select * from test(表名);----查询某表的所有数据
+                命令：$select 
+            
+            11.只查看表的结构，不查看表的数据
+                命令：$desc test(表名);
+        */
+    </script>
+</body>
+</html>
