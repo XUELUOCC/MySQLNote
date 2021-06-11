@@ -39,6 +39,7 @@
             --5.select  查找整体数据中的一部分字段数据
             --6.order by 对数据进行排序并输出
             --7.limit 取出下标从0开始，长度为5的数据
+        6.数据库中的命名规范：所有的标识符都是小写，单词与单词之间使用下划线_进行衔接
 
             1.数据库概括
                 --简称：DB
@@ -251,9 +252,9 @@
                     --trim
                         --去空格
                     --str_to_date
-                        --将字符串转化成日期
+                        --将字符串转化成日期，通常使用在insert插入操作中，插入日期格式的数据
                     --date_format
-                        --格式化日期
+                        --格式化日期，将日期转化成字符串
                     --format
                         --设置千分位
                     --round
@@ -548,7 +549,154 @@
                         sal desc
                     limit
                         5;  取出前五
+            
+            24.通用分页查询
+                --案例：
+                    每页显示pageSize条记录
+                    第pageNo页：limit (pageNo-1)*pageSize,pageSize
+                    第1页：limit 0,pageSize
+                    第2页：limit (2-1)*pageSize,pageSize
 
+            25.DQL语句总结
+                select
+                    ...
+                from
+                    ...
+                where
+                    ...
+                group by
+                    ...
+                having
+                    ...(分组之后的过滤操作)
+                order by
+                    ...(desc,asc)
+                limit
+                    0,3 (查找出下标为0，长度为3的数据)
+                排序顺序：
+                    1.from
+                    2.where
+                    3.group by
+                    4.having
+                    5.select
+                    6.order by
+                    7.limit 
+            
+            
+            1.DDL语句———表的创建create
+                --create table 表名(字段1 数据类型，字段2 数据类型，字段3 数据类型)
+                --mysql的数据类型：
+                    括号后面的是字符长度，不是字节
+                    varchar(最长255) ：可变长度字符串，会根据实际的数据长度动态分配空间
+                                        --使用： varchar(10)分配10个空间
+                                        --优点：动态分配空间
+                                        --缺点：需要动态分配空间，速度慢
+                    char(最长255)    ：定长度字符串，分配的空间固定，并不会根据实际数据长度分配
+                                        --使用：char(1)分配1个空间
+                                        --不需要动态分配空间，速度快
+                                        --缺点：使用不当可能会导致空间的浪费
+                    int(最长11)      ：整数
+                    bigint          ：长整数
+                    float           ：单精度
+                    double          ：双精度
+                    date            ：短日期类型,只包括年.月.日
+                    datetime        ：长日期类型，包括年.月.日.时.分.秒 日期信息
+                    clob            ：字符大对象，最多可存储4G的字符串，比如：存储一篇文章，存储简介
+                                        --超过255个字符的都需要采用CLOB字符大对象来存储
+                    blob            :二进制大对象，专门用来存储图片、视频，声音等流媒体数据
+                                        --往BLOB类型的字段上插入数据的时候，例如，插入一张图片，视频等，需要使用I/O流才行
+                --案例：创建学生表
+                    学号，姓名，年龄，邮箱
+                    --create table t_student(
+                        no int,
+                        name varchar(32),
+                        age int(3)  default 11,  //可通过default指定默认值
+                        email varchar(255)
+                    );
+
+            2.DDL语句———删除表drop
+                --drop table 表名;   //当这张表不存在时会报错
+                --drop table if exits 表名; //如果这张表存在，就删除
+
+            3.DML语句———向表中插入数据insert
+                --注意：
+                    --只要insert成功，一定会多一条数据，其中的数据的值是null，且这条记录不能修改
+                    --字段名和values中的值需要一一对应
+                    --表名后面的括号中的字段名顺序可以打乱，但必须和后面的values中的值对应
+                    --如果表名后面的括号的字段省略，不写的话，等同于是将所有的字段全部写上
+                --insert into 表名(字段1,字段2，字段3...) values(值1,值2,值3)
+                    insert into t_student(no,name,age,email) values(11,'学生1',21,'123456@qq.com')
+                --案例：
+                    insert插入日期和查询日期:
+                    1.先创建表
+                    create table t_student1(
+                        id int(11),
+                        name carchar(32),
+                        birth:date
+                    )
+                    2.再插入数据
+                        --1.可直接插入，不做处理
+                            原因：如果提供的日期格式是 %Y-%m-%d  ,即是1990-10-01这种格式，此时的str_to_date函数可省略,
+                                因为此时mysql会自动进行类型转换
+                                --values(1,'zhangsan','1990-10-01');
+                        --2.如果想插入的date数据格式不是"1990-10-01"的格式
+                            此时需要通过单行处理函数str_to_date,将字符串转化成date日期类型
+                            --mysql中的日期格式： %Y 年 ， %m 月 ，%d 日 ， %h 时 ， %i 分 ， %s 秒
+                            insert into t_student1(id,name,birth) values(1,'zhangsan',str_to_date('01/10/1990','%d/%m/%Y'));
+                    3.查询日期数据
+                        --1.可直接查询，不过显示的数据是"1990-10-01"的格式
+                            原因： 如果需要将数据显示在窗口上，那么显示的数据必须是字符串类型，
+                                其中mysql中将自动将数据中的date类型转化成date日期格式，
+                                但其转化成的默认格式是 %Y-%m-%d 即1990-10-01格式
+                        --2.如果需要显示的格式不是"1990-10-01"的格式，那么就需要使用date_format单行处理函数，将date类型数据转化成字符串
+                            --select name,age,date_format(birth,'%m/%d/%Y') from t_student1;  //显示的是 月/日/年
+                    4.插入长日期格式数据（datatime）
+                        mysql中长日期默认格式：%Y-%m-%d %h:%i:%s
+                        mysql中短日期默认格式：%Y-%m-%d
+                            --长日期，短日期，mysql都有默认转换，只要是这种格式
+                        //创建表
+                        create table t_student1(
+                            id int(11),
+                            name carchar(32),
+                            birth:date,
+                            create_time:datetime
+                        )
+                        //插入数据
+                        insert into t_student(id,name,birth,create_time) values(11,'zhagnsan','1990-10-01','1990-10-01 12:02:30')
+                    5.插入带有系统时间的数据
+                        --获取系统时间
+                            now() 函数，获取系统当前时间，且带有时分秒信息
+                            insert into t_student(id,name,birth,create_time) values(11,'zhagnsan','1990-10-01',now())
+
+            4.DML语句———修改表中的数据update
+                --update 表名 set 字段名=值1,字段名=值2,,字段名=值3... where 条件
+                    --注意：没有条件限制，会导致所有的数据全部更新,即所有的数据都会被修改
+                --案例：
+                    update t_study1 set name='lisi1',birth='2000-10-05' where id=2; //修改id=2的数据，修改其name,birth
+                
+            5.DML语句———删除表中的数据delete
+                --delete from 表名 where 条件;
+                    --注意：没有条件的限制，整张表的数据都会被删除
+                --案例：
+                    delete from t_study1 where id=2;  //删除表中id=2的数据
+                    delete from t_study1; //删除整张表的所有数据
+
+            6.insert插入多条数据
+                --insert into 表名(z字段名1，字段名2) values(),(),()...;
+                    insert into t_study1(id,name,birth) values
+                    (3,'zhangsan','1999-10-12'),
+                    (4,'lisu','2000-04-01')
+
+            7.表的复制
+                --create table 创建的表名 as 查询语句
+                    create table t_study2 as select * from t_study1  //创建表t_study2,并将表t_study1的内容写入创建的表t_study2中
+                --create table test1 as select name,job from test where name='testData'  //将表test中name=testData的数据复制到新建的表test1中
+                --原理：将一个查询结果当成一张表新建，这样可完成表的快速复制
+            
+            8.将查询结果插入到表中
+                --前提：查询结果符合插入表的数据结构，即查询结果和插入的表的数据结构一一对应
+                insert into 表名 查询语句
+                    --insert into test1 select * from test   //将t从test中查到的数据插入到test1表中
+                
 
         
         */
