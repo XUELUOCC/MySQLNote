@@ -162,7 +162,7 @@
                         --不确定优先级，就添加()
                     大于>
                     小于<
-                    不等于 !=,,,<>
+                    不等于 !=或者<>
                     等于 =
                     =null 不支持，只能使用is null
                         --因为数据库中的null代表什么都没有，所以不能使用等号=来衡量
@@ -676,6 +676,13 @@
             5.DML语句———删除表中的数据delete
                 --delete from 表名 where 条件;
                     --注意：没有条件的限制，整张表的数据都会被删除
+                    --原理：一个一个数据删除，但删除完成后其中的空间还在，
+                    --优点：是之后还可以进行恢复  
+                            前提：已经执行事务  start transaction
+                            使用rollback回滚，恢复数据
+                                --$rollback
+                            --执行事务和rollback;是配套的，只有执行了事务，才能回滚
+                    --缺点：删除的效率比较低
                 --案例：
                     delete from t_study1 where id=2;  //删除表中id=2的数据
                     delete from t_study1; //删除整张表的所有数据
@@ -696,9 +703,250 @@
                 --前提：查询结果符合插入表的数据结构，即查询结果和插入的表的数据结构一一对应
                 insert into 表名 查询语句
                     --insert into test1 select * from test   //将t从test中查到的数据插入到test1表中
-                
 
-        
+            9. DDL---删除大表
+                --$truncate table user_table
+                --注意：删除后不可恢复
+                        删除的是表中的数据，表还在
+                --优点：删除效率比较高，表被一次截断，物理删除
+                --缺点：删除后数据不可恢复，不支持回滚
+
+            
+            1.表的约束
+                --英文：constraint
+                --在创建表的时候，我们可以给表总的字段数据加上一些约束，来保证这个表中的数据的完整性，有效性
+                --作用：
+                    为了保证表中数据的有效性，完整性，
+                --常见的约束：
+                    --非空约束 not null  只有列级约束，没有表级约束
+                    --唯一性约束 unique  列级约束  表级约束
+                    --主键约束：primary key (简称 PK)  列级约束 表级约束
+                    --外键约束： foreign key (简称 FK)
+                    --检查约束： check (mysql不支持，oracle支持)
+                --注意：
+                    --约束添加在列字段的后面，被称为列级约束 
+                        create table test(
+                            id not null,  //列级约束
+                            name
+                        )
+                    --约束没有添加到列的后面，被称为表级约束
+                        create table test(
+                            id,
+                            name,
+                            unique(id,name)  //表级约束，id和name字段联合起来具有唯一性
+                        )
+            2.非空约束
+                --非空约束not null的字段不能为null
+                --案例：
+                    create table user1(
+                        id int(32) not null,  //表示id字段不能为空
+                        name varchar(32) not null, //表示name字段不能为空
+                        password varchar(255)  not null //表示password字段不能为空
+                    )
+
+            3.唯一性约束
+                --唯一性约束unique的字段不能重复，但是可以为null（即在表中该字段的数据不能重复）
+                --案例：
+                    create table user1(
+                        id int(32) unique  //表示id字段不能重复，不能有两个相同的id
+                        name varchar(32) , 
+                        password varchar(255) 
+                    )
+
+            4.多个字段联合约束
+                --多个字段联合起来约束
+                案例：
+                    --name和email字段联合起来具有唯一性
+                        --符合的数据
+                            --name:'zhangsan',email:'zhangsan@123.com'
+                            --name:'zhangsan',email:'zhansan@qq.com'
+                    create table user1(
+                        id int(32) ,
+                        name varchar(32) , 
+                        password varchar(255) ,
+                        email varchar(32),
+                        unique(name,email)
+                    )  
+            
+            5.多个约束使用在同一字段
+                --多个约束联合设置字段，例如 name同时具有非空性，唯一性
+                create table user1(
+                    id int(32) not null unique,
+                    name varchar(32) , 
+                    password varchar(255) ,
+                    email varchar(32),
+                )  
+                注意：在mysql中，一个字段同时被not null,unique约束，则该字段自动变成主键字段（Oracle中不一样）
+            
+            6.主键约束
+                --一张表中主键一般只有一个，且主键值一般都是数字，int/bigint/char等类型
+                --主键是唯一的，且不能重复
+                --相关术语
+                    主键约束 ：就时一种约束
+                    主键字段：该字段上添加了主键约束，这样的字段叫做 主键字段
+                    主键值：主键字段上的每一个值都叫做主键值
+                --作用和定义
+                    主键值是每一行记录的唯一标识，类似于是每一行记录的身份证号
+                --注意：
+                    任何一张表都应该要有主键，没有的主键的表是无效的
+                    实际开发中不建议使用复合主键，一般使用单一主键
+                --特征：
+                    not null  unique （主键值不能为null，同时也不能重复）
+                --案例：
+                    //单一主键
+                    create table user1(
+                        id int primary key,   //设置id为主键字段
+                        name varchar(32) , 
+                        password varchar(255) ,
+                        email varchar(32),
+                    )  
+                    //单一主键
+                    create table user1(
+                        id int,   
+                        name varchar(32) , 
+                        password varchar(255) ,
+                        email varchar(32),
+                        primary key(id)  //id做主键
+                    )  
+                    //复合主键
+                    create table user1(
+                        id int,   
+                        name varchar(32) , 
+                        password varchar(255) ,是
+                        email varchar(32),
+                        primary key(id,name)  //id和name联合起来做主键
+                    )  
+                --主键也可分为自然主键和业务主键
+                    --自然主键：主键值是一个自然数，和业务没关系
+                    --业务主键：主键值和业务紧密联系，例如拿银行卡账号做主键值
+                    实际开发中，自然主键使用的比较多，因为主键只要做到不重复就好，不需要有意义。
+                    使用业务主键，一旦业务发生改变，可能会影响到主键值
+
+            7.mysql中的自动维护主键
+                --案例：主键自增
+                create table user1(
+                    id int primary key auto_increment,  //id做主键 且主键自增 
+                    name varchar(32) , 
+                    password varchar(255) ,
+                    email varchar(32),
+                )  
+            
+            8.外键约束
+                --相关术语：
+                    外键约束：外键约束
+                    外键字段：添加外键约束的字段
+                    外键值：外键字段的每一个值
+                --作用：约束某字段只能取固定的一些值 类似性别只有男/女，不能写其他值
+                --案例：
+                    设置班级和学生信息
+                        班级表中存在cno班级编号，班级名称classname
+                        学生表中存在no编号，name,cno班级编号（100，101）
+                            --通过cno字段连接两表的关系
+                        --当cno字段没有任何约束的时候，可能会导致出现无效的字段，可能会出现102，103等，但cno字段中不存在102，103
+                            为了保证cno字段中的值是100，101，而不是其他的值，需要给cno字段添加外键约束
+                            此时cno字段就是外键字段，cno字段中的值就时外键值
+                        --给学生表的cno添加外键约束
+                        --学生表是子表，班级信息表是父表
+                --添加外键约束后，存在父子关系
+                    --添加外键约束的字段所存在的表是子表，外键约束内容的表是父表
+                --注意：
+                    删除表的顺序：先删除子表，再删除父表（因为子表中使用外键约束的字段，先删除才不出错）
+                    创建表的顺序：先创建父表，再创建子表
+                    插入数据：先插入父表，再插入子表
+                    子表引用父表的某个字段，该字段不一定是主键，但是该字段的值必须具有unique唯一性，不能重复
+                --使用：
+                    先创建父表
+                    create table t_class(
+                        classno int primary key,
+                        classname varchar(255)
+                    )
+                    再创建子表,添加外键约束
+                    create table t_student(
+                        no int  primary key auto_increment,  //主键自增
+                        name varchar(255),
+                        cno int,
+                        foreign key(cno) references t_class(classno)  //外键是cno，引用的是t_class表中的calssno
+                    )
+            
+            9.存储引擎
+                --定义：MySQL中的特有的一种术语，其他的数据库中没有，Oracle中页存在，不过并不是叫这个名字
+                        存储引擎是一个表存储/组织数据的方式
+                        不同的存储引擎，表存储的数据的方式不同
+                --添加/指定存储引擎：
+                    --展示该表的存储引擎（ENGINE=... DEFAULT CHARSET=utf8）
+                        $show create table 表名   （展示建表时的sql语句，其中存在存储引擎）
+                            --+-------+--------------------------------------------------------------------------------------------------------------------+
+                            | Table | Create Table                                                                                                       |
+                            +-------+--------------------------------------------------------------------------------------------------------------------+
+                            | user1 | CREATE TABLE `user1` (
+                            `id` int NOT NULL,
+                            `name` varchar(32) DEFAULT NULL
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 |
+                    
+                    --指定存储引擎
+                        --再建表的时候可以再最后小括号‘)’的右边使用,指定存储引擎以及编码方式
+                            ENGINE来指定存储引擎
+                            CHARSET来指定这张表的字符编码方式
+                            --create table userTest(
+                                ...
+                            ) ENGINE=InnoDB DEFAULT CHARSET=utf8
+                    --注意：
+                        mysql的默认的存储引擎是InnoDB
+                        mysql的默认的字符集编码方式是utf8
+
+            10.mysql支持的存储引擎
+                --使用命令
+                    $show engines \G  (展示当前数据库mysql的版本所支持的存储引擎)
+                --注意：
+                    mysql支持九大存储引擎，当前版本不同，支持的情况不同
+                --常用的存储引擎：
+                    InnoDB 
+                        这是mysql默认的存储引擎，同时也是一个重量级的存储引擎
+                        每个表都以.frm格式的文件表示
+                        InnoDB支持事务（事务就是解决安全性问题），安全性高，支持数据库奔溃后自动恢复机制
+                        InnoDB表空间tablespace被用于存储表的内容（表空间是一个逻辑名称，表空间存储数据+索引）
+                        特点：
+                            安全性高
+                            为了保证数据的安全性，效率不是很高，并且也不能压缩，不能转换为只读
+                    MyISAM存储引擎:
+                        它管理的表具有的特点：
+                            使用三个文件表示每个表：
+                                格式文件——存储表结构的定义（一般是存储在frm文件中，例如 mytable.frm）
+                                数据文件——存储表行的内容（一般存储在MYD文件中，例如 mytable.MYD）
+                                索引文件——存储表上索引（一般存储在MYI文件中，例如 mytable.MYI）  索引相当于一本书的目录，缩小扫描的范围 
+                        具备的特点：
+                            --可被转化为压缩，只读表来节省空间，同时也是优势
+                            --安全性低，不支持事务
+                    MEMORY存储引擎：
+                        使用MEMORY存储引擎的表，其数据存储在内存中，且行的长度固定
+                        这两个特点使得MEMORY存储引擎非常快
+                        特点：
+                            --每个表都是以.frm格式的文件表示
+                            --表的索引及数据都存储在内存中
+                            --表级锁机制
+                            --不能包含TEXT或BLOB字段
+                        优点：
+                            查询效率高，
+                            不安全，关机后数据立即消失。因为数据和索引是保存在内存中
+
+            11.事务
+                --一个事务其实就是一个完整的业务逻辑，是一个最小的工作单元，不可再分
+                --一个事务说到本质，其实就是多条DML语句同时成功，或者同时失败 
+                完整的业务逻辑：
+                    类似于转账，A转账B，A和B的账户的钱同时发生变化，这就是一个完整的业务逻辑
+                    就是两个update语句必须同时成功或者同时失败，这样才才能保证钱是正确的，业务逻辑正确的 
+                --只有DML语句才有事务，即是，增，删，改，语句才会有事务，其他语句和事务无关
+                --涉及到数据的增删改（需要多个DML语句共同联合起来才能完成），就一定要考虑到安全性问题，即需要考虑到事务
+                --注意：
+                    如果只有一条DML语句就完成的业务逻辑，那么就不考虑事务，因为没有意义
+            
+            12.事务的使用
+                --事务怎样做到多条DML语句同时成功或者同时失败的
+                    InnoDB存储引擎，提供了一组用来记录事务性活动的日志文件
+
+                    
+
+
         */
     </script>
 </body>
