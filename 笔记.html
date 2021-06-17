@@ -5,10 +5,41 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        *{
+            padding:0;
+            margin:0;
+        }
+        .container{
+            width:300px;
+            margin:100px auto;
+            border:1px solid #ddd;
+            padding:10px;
+        }
+        p{
+            width:100%;
+            /* padding:10px 0 0px; */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            text-align: justify;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <p>
+            文本dfbsfgbfg()（）《》溢出截断是一个比较常见的场景，如新闻列表页、微博列表、商品列表等，
+            溢出截断主要是为了保证界面的整齐。在《前端开发需要知道的 10 个 CSS 技巧》
+            中有提到过多行文本溢出的处理，本文总结一些优雅的处理文本溢出截断的方法。
+            文本溢出截断是一个比较常见的场景，如新闻列表页、微博列表、商品列表等，
+            溢出截断主要是为了保证界面的整齐。在《前端开发需要知道的 10 个 CSS 技巧》
+            中有提到过多行文本溢出的处理，本文总结一些优雅的处理文本溢出截断的方法。
+        </p>
+    </div>
     
-
+    
     <script>
         /*
         注意：
